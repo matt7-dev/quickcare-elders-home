@@ -1,0 +1,49 @@
+# build output
+dist/
+# generated types
+.astro/
+
+# dependencies
+node_modules/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+
+# environment variables
+.env
+.env.production
+
+# macOS-specific files
+.DS_Store
+
+# jetbrains setting folder
+.idea/
+
+# CDK
+infra/cdk.out/
+infra/node_modules/
+cdk.context.json
+
+# Never commit credentials
+*.pem
+.aws/
+
+# spare images
+.spares
+
+# Unused spare photography, kept locally only
+spares/
+
+# Local editor/agent tooling, not part of the project
+.agents/
+.claude/
+skills-lock.json
+
+# Design-tool working files. direction.json is kept: it records the committed
+# art direction. The rendered inspection screenshots are regenerable.
+.taste-skill/inspect/
+.impeccable/hook.cache.json

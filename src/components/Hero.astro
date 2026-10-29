@@ -1,0 +1,49 @@
+---
+import { Image } from 'astro:assets';
+import Icon from './Icon.astro';
+import { site } from '../config/site';
+import { heroImage } from '../lib/images';
+---
+
+<section id="top" data-ga-area="hero" class="bg-paper">
+  <div class="mx-auto grid max-w-6xl items-center gap-10 px-5 py-14 sm:px-8 md:py-20 lg:grid-cols-[1.15fr_1fr] lg:gap-14">
+    <div class="reveal">
+      <!-- The h1 carries the first screen: the largest type on the page, and a
+           step above every section heading. -->
+      <h1 class="text-[clamp(2.5rem,1.1rem+4.2vw,4.5rem)] leading-[1.02]">A Safe, Caring Home</h1>
+      <p class="mt-6 max-w-md text-xl text-ink">For your family, here in Moratuwa. {site.heroLead}</p>
+
+      <div class="mt-9 flex flex-col gap-3 sm:flex-row">
+        <a href={site.phoneHref} class="btn btn-primary text-lg">
+          <Icon name="phone" class="h-5 w-5" /> Call {site.phoneLocal}
+        </a>
+        <a href={site.whatsappHref} class="btn btn-outline text-lg" target="_blank" rel="noopener">
+          <Icon name="whatsapp" class="h-5 w-5" /> WhatsApp us
+        </a>
+      </div>
+
+      <p class="mt-6 text-base text-ink-soft">{site.hours} · Visitors welcome</p>
+    </div>
+
+    <div class="reveal" style="--reveal-delay: 120ms">
+      {
+        heroImage ? (
+          <Image
+            src={heroImage}
+            alt="Quick Care Elders Home, a residential care home in Moratuwella, Moratuwa"
+            widths={[600, 900, 1300]}
+            sizes="(min-width: 1024px) 50vw, 100vw"
+            format="webp"
+            loading="eager"
+            fetchpriority="high"
+            class="aspect-[4/3] w-full rounded-media bg-stone object-cover"
+          />
+        ) : (
+          <div class="flex aspect-[4/3] w-full items-center justify-center rounded-media bg-stone p-6 text-center text-ink-soft">
+            Hero photo goes here (src/assets/images/hero.jpg)
+          </div>
+        )
+      }
+    </div>
+  </div>
+</section>

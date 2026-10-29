@@ -1,0 +1,12 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { site } from '../config/site';
+---
+
+<Layout title={`Page not found | ${site.name}`} noindex>
+  <main id="main" class="mx-auto flex min-h-svh max-w-xl flex-col items-center justify-center px-5 text-center">
+    <h1 class="text-4xl font-semibold">Page not found</h1>
+    <p class="mt-4">Sorry, we couldn't find that page.</p>
+    <a href="/" class="btn btn-call mt-8">Back to Quick Care Elders Home</a>
+  </main>
+</Layout>

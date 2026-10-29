@@ -1,0 +1,131 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/fraunces';
+@import '@fontsource-variable/nunito-sans';
+
+/*
+  Grounds and inks are taken from the real facility photos in
+  src/assets/images/ (common room, dining area, reception, private/twin
+  rooms); the one colour is the company's own blue. See .taste-skill/direction.json.
+*/
+@theme {
+  --font-sans: 'Nunito Sans Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-serif: 'Fraunces Variable', ui-serif, Georgia, serif;
+
+  --color-paper: #f9f9f7; /* page ground — barely-warm white, so the rooms photograph bright */
+  --color-stone: #e6ded1; /* secondary ground / tile surface — soft sand, where the warmth lives */
+
+  /* Not black: the text is the company blue taken down to reading weight, and
+     the secondary a muted version of the same. On warm paper a neutral
+     near-black reads as a smudge, and a cool grey-black reads clinical; navy
+     ink on a warm ground is the pairing that belongs to both. */
+  --color-ink: #0e2c4e; /* body text — 13.1:1 on paper */
+  --color-ink-soft: #46596e; /* secondary text — 6.7:1 on paper, 5.4:1 on the sand panels */
+
+  /* The company blue, used at full strength: dark enough to carry paper-coloured
+     type, so it serves as the dark ground as well as the accent. */
+  --color-accent: #053966;
+  --color-accent-dark: #02213d; /* the step down, for pressed and hover states */
+
+  /* One radius for every photo, panel and map on the page, set once here. */
+  --radius-media: 0.75rem;
+
+  /* Type: pushed above the usual 16–20px web default. Body never drops below 18px. */
+  --text-xs: 1rem; /* 16px — used only for footer/legal-style meta, never body copy */
+  --text-sm: 1.0625rem; /* ~17px */
+  --text-base: clamp(1.125rem, 1.06rem + 0.3vw, 1.25rem); /* 18–20px */
+  --text-lg: clamp(1.25rem, 1.1rem + 0.6vw, 1.4375rem); /* 20–23px */
+  --text-xl: clamp(1.375rem, 1.15rem + 0.9vw, 1.75rem); /* 22–28px — lead sentences */
+  --text-2xl: clamp(1.75rem, 1.3rem + 1.8vw, 2.5rem); /* 28–40px */
+  --text-3xl: clamp(2.25rem, 1.5rem + 3vw, 3.5rem); /* 36–56px */
+  --text-4xl: clamp(2.75rem, 1.6rem + 4.6vw, 4.5rem); /* 44–72px — hero headline */
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 6rem;
+    /* The surfaces the browser draws, not us: scrollbar and form controls. */
+    color-scheme: light;
+    scrollbar-color: var(--color-ink-soft) var(--color-paper);
+    accent-color: var(--color-accent);
+  }
+  body {
+    @apply bg-paper font-sans text-base leading-relaxed text-ink antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-serif text-ink;
+  }
+  ::selection {
+    background-color: var(--color-accent);
+    color: var(--color-paper);
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 3px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+}
+
+@layer components {
+  /* One accent colour on every action — Call and WhatsApp differ by label and
+     icon only, never by hue, per the direction's "one ground, one ink, one
+     accent" rule. */
+  .btn {
+    @apply inline-flex min-h-12 items-center justify-center gap-2 whitespace-nowrap rounded-full px-6 py-3 text-base font-bold transition-colors;
+  }
+  .btn-primary {
+    @apply bg-accent text-paper hover:bg-accent-dark;
+  }
+  .btn-outline {
+    @apply border-2 border-accent text-accent hover:bg-accent hover:text-paper;
+  }
+  .section {
+    @apply mx-auto w-full max-w-6xl px-5 py-16 sm:px-8 md:py-24;
+  }
+
+  /* A short scrim under the sticky bar, in the page's own ground colour, so
+     content dissolves into the header instead of being cut by a hard line.
+     Same hue throughout — an edge treatment, not a decorative gradient. */
+  .header-scrim {
+    background-image: linear-gradient(to bottom, var(--color-paper), transparent); /* taste-skill-ignore: neutral same-hue scrim, the one gradient the house rules allow */
+  }
+
+  /* Nothing at rest carries a shadow. These two are real overlays, which the
+     house rule exempts: a dropdown menu and the sticky mobile CTA bar. */
+  /* Only once the menu is actually open, so nothing at rest carries it. */
+  details[open] .overlay-menu {
+    box-shadow: 0 12px 28px rgb(14 44 78 / 0.18); /* taste-skill-ignore: a dropdown menu is a real overlay */
+  }
+  .overlay-bar {
+    box-shadow: 0 -2px 12px rgb(14 44 78 / 0.12); /* taste-skill-ignore: a sticky bar is a real overlay */
+  }
+}
+
+/* Motion budget, kept deliberately small: one entrance per section on scroll,
+   feedback on controls, and the sticky mobile CTA's slide. Nothing else moves. */
+.js .reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+}
+.js .reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

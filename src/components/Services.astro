@@ -1,0 +1,56 @@
+---
+import { Image } from 'astro:assets';
+import { serviceGroups } from '../config/site';
+import { photo } from '../lib/images';
+
+// A real photograph for each group, so the section carries pictures of this
+// home rather than a column of text on its own.
+const groupPhotos = [
+  { image: photo('gallery-dining-area'), alt: 'The dining area at Quick Care Elders Home, Moratuwa' },
+  { image: photo('gallery-our-caregivers'), alt: 'Caregivers with residents at Quick Care Elders Home, Moratuwa' },
+];
+---
+
+<section id="services" class="bg-stone/30">
+  <div class="section">
+    <h2 class="max-w-[16ch] text-3xl">What care looks like here</h2>
+    <p class="mt-5 max-w-xl text-xl text-ink">
+      Everything a resident needs across the day, from meals and company to medicines and nursing.
+    </p>
+
+    <div class="mt-12 grid gap-10 lg:grid-cols-2 lg:gap-12">
+      {
+        serviceGroups.map((group, gi) => (
+          <div class="reveal" style={`--reveal-delay: ${gi * 120}ms`}>
+            {groupPhotos[gi]?.image ? (
+              <Image
+                src={groupPhotos[gi].image}
+                alt={groupPhotos[gi].alt}
+                widths={[500, 800]}
+                sizes="(min-width: 1024px) 45vw, 100vw"
+                format="webp"
+                loading="lazy"
+                class="aspect-[16/10] w-full rounded-media bg-stone object-cover"
+              />
+            ) : (
+              <div class="flex aspect-[16/10] w-full items-center justify-center rounded-media bg-stone text-ink-soft">
+                {group.name} photo
+              </div>
+            )}
+
+            <h3 class="mt-6 text-2xl">{group.name}</h3>
+
+            <ul class="mt-5 space-y-6">
+              {group.items.map((item) => (
+                <li>
+                  <p class="text-lg font-bold text-ink">{item.title}</p>
+                  <p class="mt-1 max-w-[42ch] text-base text-ink">{item.description}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>

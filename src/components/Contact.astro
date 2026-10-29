@@ -1,0 +1,68 @@
+---
+import Icon from './Icon.astro';
+import { site } from '../config/site';
+
+const mapSrc = site.maps.embed;
+const directions = site.maps.directions;
+---
+
+<section id="contact" data-ga-area="contact" class="bg-paper">
+  <div class="section">
+    <h2 class="text-3xl">Visit us</h2>
+
+    <!-- One row: everything you can read on the left, the map holding the
+         right. The two actions come first, since a call is the whole point. -->
+    <div class="reveal mt-10 grid gap-10 lg:grid-cols-2 lg:gap-14">
+      <div>
+        <p class="max-w-[34ch] text-xl leading-snug text-ink">
+          Call or message us any time to arrange a visit. We're always happy to show you around.
+        </p>
+
+        <div class="mt-8 flex flex-col gap-3 sm:flex-row">
+          <a href={site.phoneHref} class="btn btn-primary text-lg">
+            <Icon name="phone" class="h-5 w-5" /> Call {site.phoneLocal}
+          </a>
+          <a href={site.whatsappHref} class="btn btn-outline text-lg" target="_blank" rel="noopener">
+            <Icon name="whatsapp" class="h-5 w-5" /> WhatsApp us
+          </a>
+        </div>
+
+        <dl class="mt-10 space-y-7">
+          <div>
+            <dt class="text-lg font-bold text-ink">Address</dt>
+            <dd class="mt-1">
+              <address class="max-w-sm text-lg not-italic text-ink">
+                {site.address.street}<br />{site.address.locality} {site.address.postalCode}, {site.address.countryName}
+              </address>
+              <a href={directions} class="mt-1 inline-block text-lg font-bold text-accent underline underline-offset-4" target="_blank" rel="noopener">
+                Get directions
+              </a>
+            </dd>
+          </div>
+          <div>
+            <dt class="text-lg font-bold text-ink">Hours</dt>
+            <dd class="mt-1 text-lg text-ink">{site.hours}, every day</dd>
+          </div>
+          <div>
+            <dt class="text-lg font-bold text-ink">Facebook</dt>
+            <dd class="mt-1">
+              <a href={site.facebook} class="text-lg text-accent underline underline-offset-4" target="_blank" rel="noopener">
+                Quick Care Elders Home
+              </a>
+            </dd>
+          </div>
+        </dl>
+      </div>
+
+      <div class="overflow-hidden rounded-media bg-stone">
+        <iframe
+          title="Map showing Quick Care Elders Home in Moratuwa"
+          src={mapSrc}
+          class="h-80 w-full lg:h-full lg:min-h-[30rem]"
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+        ></iframe>
+      </div>
+    </div>
+  </div>
+</section>

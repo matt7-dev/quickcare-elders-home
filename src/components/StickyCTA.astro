@@ -1,0 +1,26 @@
+---
+import Icon from './Icon.astro';
+import { site } from '../config/site';
+---
+
+<!-- Mobile only: desktop uses the header buttons -->
+<div
+  id="sticky-cta"
+  data-ga-area="sticky-bar"
+  class="overlay-bar fixed inset-x-0 bottom-0 z-50 translate-y-full bg-paper px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 transition-transform duration-300 md:hidden"
+>
+  <div class="grid grid-cols-2 gap-3">
+    <a href={site.phoneHref} class="btn btn-primary min-h-14 text-lg"><Icon name="phone" class="h-5 w-5" /> Call</a>
+    <a href={site.whatsappHref} class="btn btn-outline min-h-14 text-lg" target="_blank" rel="noopener">
+      <Icon name="whatsapp" class="h-5 w-5" /> WhatsApp
+    </a>
+  </div>
+</div>
+
+<script>
+  // Slide the bar in once the user scrolls past the hero's own buttons.
+  const bar = document.getElementById('sticky-cta');
+  const toggle = () => bar?.classList.toggle('translate-y-full', scrollY < 400);
+  addEventListener('scroll', toggle, { passive: true });
+  toggle();
+</script>

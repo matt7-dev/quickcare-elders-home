@@ -1,0 +1,30 @@
+---
+import { trustPoints } from '../config/site';
+---
+
+<section id="why-us" class="bg-paper">
+  <div class="section">
+    <ul class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+      <li class="reveal col-span-2 flex min-h-32 flex-col justify-center rounded-media bg-accent p-6 text-paper sm:p-8">
+        <h2 class="text-2xl text-paper">Why families choose us</h2>
+      </li>
+      {
+        trustPoints.map((p, i) => (
+          <li
+            class:list={[
+              'reveal flex min-h-40 flex-col justify-center rounded-media p-6 sm:p-8',
+              i % 2 === 0 ? 'bg-stone/60' : 'bg-stone/30',
+              // Full width on a phone so no description wraps to three-word
+              // lines; the designed row-filling grid returns at sm and lg.
+              i >= 2 ? 'col-span-2 sm:col-span-1 lg:col-span-2' : 'col-span-2 sm:col-span-1',
+            ]}
+            style={`--reveal-delay: ${i * 70}ms`}
+          >
+            <h3 class="text-xl font-bold">{p.title}</h3>
+            <p class="mt-2 text-base text-ink">{p.description}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>

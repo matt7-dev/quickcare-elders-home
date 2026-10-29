@@ -1,0 +1,97 @@
+name: Deploy site
+
+# Builds the Astro site and publishes it to S3 + CloudFront.
+#
+# This workflow only ships CONTENT. The infrastructure it ships to (bucket,
+# distribution, DNS, the IAM role used below) is created separately with
+# `cdk deploy`, so a bad commit can never reshape the infrastructure.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # lets you re-run a deploy by hand from the Actions tab
+
+permissions:
+  # Lets the job ask GitHub for a signed OIDC token to present to AWS.
+  # Without this line the credentials step fails: the token is not issued.
+  id-token: write
+  # The default `write` is not needed; this job only reads the repository.
+  contents: read
+
+# One deploy at a time. Two concurrent `s3 sync --delete` runs could interleave
+# and delete each other's files, so a second push waits rather than cancelling.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: ${{ vars.SITE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm # reuses the npm cache between runs, so installs are seconds
+
+      - run: npm ci # ci, not install: installs exactly the lockfile, never updates it
+
+      - name: Type-check
+        run: npx astro check
+
+      - name: Build
+        run: npm run build
+        env:
+          # Repository variable: Settings > Secrets and variables > Actions > Variables
+          SITE_URL: ${{ vars.SITE_URL }}
+
+      # Swaps the OIDC token for temporary AWS credentials (about an hour).
+      # No AWS access key exists anywhere in this repository.
+      - name: Authenticate to AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: us-east-1
+          role-session-name: github-actions-deploy
+
+      # Assets first, pages second. Every file in /_astro has a content hash in
+      # its name, so a new build writes new filenames and can never overwrite
+      # one a visitor is mid-download. Uploading them before the HTML that
+      # references them means there is no instant where a page is live but its
+      # stylesheet is missing.
+      - name: Upload hashed assets
+        run: |
+          aws s3 sync dist/ "s3://${{ vars.S3_BUCKET }}/" \
+            --exclude "*" --include "_astro/*" \
+            --cache-control "public,max-age=31536000,immutable" \
+            --no-progress
+
+      # Then the HTML, sitemap, images and icons. --delete removes files that
+      # are no longer in the build, so a deleted page really disappears.
+      # /_astro is excluded from the delete sweep on purpose: the previous
+      # build's assets stay available for anyone still on the old HTML.
+      - name: Upload pages
+        run: |
+          aws s3 sync dist/ "s3://${{ vars.S3_BUCKET }}/" \
+            --exclude "_astro/*" --delete \
+            --cache-control "public,max-age=0,must-revalidate" \
+            --no-progress
+
+      # S3 now holds the new site, but CloudFront's edge caches still hold the
+      # old one. Invalidating tells every edge to drop what it has and refetch.
+      # Waiting means the job only goes green once the live site is actually
+      # the new build.
+      - name: Invalidate the CloudFront cache
+        run: |
+          id=$(aws cloudfront create-invalidation \
+            --distribution-id "${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}" \
+            --paths "/*" \
+            --query 'Invalidation.Id' --output text)
+          echo "Invalidation $id created — waiting for all edges to catch up"
+          aws cloudfront wait invalidation-completed \
+            --distribution-id "${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}" \
+            --id "$id"
+          echo "Live at ${{ vars.SITE_URL }}"

@@ -1,0 +1,18 @@
+{
+  "app": "npx tsx bin/app.ts",
+  "watch": {
+    "include": [
+      "**"
+    ],
+    "exclude": [
+      "node_modules",
+      "cdk.out"
+    ]
+  },
+  "context": {
+    "domainName": "quickcare.lk",
+    "githubRepo": "Mathews-axisTech/quickcare-elders-home",
+    "githubBranch": "main",
+    "@aws-cdk/core:defaultCrossStackReferences": "strong"
+  }
+}

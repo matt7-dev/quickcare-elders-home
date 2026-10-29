@@ -1,0 +1,31 @@
+name: CI
+
+# The checks that run before anything is merged. Deploying is a separate
+# workflow that only runs once a change is on main.
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  # Supersede an in-flight run when the branch is pushed again: unlike a
+  # deploy, a half-finished check is safe to abandon.
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Type-check
+        run: npx astro check
+      - name: Build
+        run: npm run build

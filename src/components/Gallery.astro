@@ -1,0 +1,133 @@
+---
+import { Image } from 'astro:assets';
+import Icon from './Icon.astro';
+import { galleryImages } from '../lib/images';
+
+const placeholders = ['Bedroom', 'Common area', 'Bathroom', 'Dining area', 'Garden', 'Reception', 'Caregivers', 'Daily activities'];
+---
+
+<section id="facilities" class="bg-paper">
+  <div class="section">
+    <h2 class="text-3xl">Take a look inside</h2>
+
+    <ul class="mt-10 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+      {
+        galleryImages.length > 0
+          ? galleryImages.map((g, i) => (
+              <li class="reveal" style={`--reveal-delay: ${(i % 4) * 70}ms`}>
+                <button
+                  type="button"
+                  class="block w-full overflow-hidden rounded-media bg-stone text-left"
+                  data-lightbox
+                  data-index={i}
+                  aria-label={`View larger: ${g.alt}`}
+                >
+                  <Image
+                    src={g.image}
+                    alt={g.alt}
+                    widths={[300, 500]}
+                    sizes="(min-width: 1024px) 23vw, 48vw"
+                    format="webp"
+                    loading="lazy"
+                    class="aspect-[4/3] w-full object-cover"
+                  />
+                  <span class="block px-1 py-2 text-base text-ink-soft">{g.label}</span>
+                </button>
+              </li>
+            ))
+          : placeholders.map((label) => (
+              <li>
+                <div class="flex aspect-[4/3] w-full items-center justify-center rounded-media bg-stone text-center text-ink-soft">
+                  {label} photo
+                </div>
+              </li>
+            ))
+      }
+    </ul>
+  </div>
+
+  <!-- Lightbox: native <dialog> gives focus trapping + Esc for free -->
+  <dialog
+    id="lightbox"
+    class="m-auto max-h-[100dvh] max-w-[100vw] bg-transparent p-0 backdrop:bg-ink/90"
+    aria-label="Photo viewer"
+  >
+    <div class="relative flex h-[100dvh] w-[100vw] flex-col items-center justify-center p-3 sm:p-8">
+      <img id="lightbox-img" alt="" class="max-h-[80dvh] max-w-full object-contain" />
+      <p id="lightbox-caption" class="mt-3 text-center text-base text-paper">&nbsp;</p>
+      <button
+        type="button"
+        data-lb="close"
+        aria-label="Close"
+        class="absolute right-3 top-3 flex h-12 w-12 items-center justify-center rounded-full bg-paper/15 text-paper hover:bg-paper/30"
+      >
+        <Icon name="close" class="h-7 w-7" />
+      </button>
+      <button
+        type="button"
+        data-lb="prev"
+        aria-label="Previous photo"
+        class="absolute left-2 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-paper/15 text-2xl text-paper hover:bg-paper/30"
+      >
+        ‹
+      </button>
+      <button
+        type="button"
+        data-lb="next"
+        aria-label="Next photo"
+        class="absolute right-2 top-1/2 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-paper/15 text-2xl text-paper hover:bg-paper/30"
+      >
+        ›
+      </button>
+    </div>
+  </dialog>
+</section>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>('#lightbox');
+  const buttons = [...document.querySelectorAll<HTMLButtonElement>('[data-lightbox]')];
+
+  if (dialog && buttons.length) {
+    const img = dialog.querySelector<HTMLImageElement>('#lightbox-img')!;
+    const caption = dialog.querySelector<HTMLElement>('#lightbox-caption')!;
+    let current = 0;
+
+    const show = (i: number) => {
+      current = (i + buttons.length) % buttons.length;
+      const thumb = buttons[current].querySelector('img')!;
+      const largest = thumb.srcset.split(',').pop()?.trim().split(' ')[0];
+      img.src = largest || thumb.currentSrc || thumb.src;
+      img.alt = thumb.alt;
+      caption.textContent = thumb.alt;
+    };
+
+    buttons.forEach((b, i) =>
+      b.addEventListener('click', () => {
+        show(i);
+        dialog.showModal();
+      }),
+    );
+    dialog.querySelector('[data-lb="close"]')!.addEventListener('click', () => dialog.close());
+    dialog.querySelector('[data-lb="prev"]')!.addEventListener('click', () => show(current - 1));
+    dialog.querySelector('[data-lb="next"]')!.addEventListener('click', () => show(current + 1));
+
+    dialog.addEventListener('click', (e) => {
+      if (e.target === dialog) dialog.close();
+    });
+    dialog.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') show(current - 1);
+      if (e.key === 'ArrowRight') show(current + 1);
+    });
+
+    let startX = 0;
+    dialog.addEventListener('touchstart', (e) => (startX = e.touches[0].clientX), { passive: true });
+    dialog.addEventListener(
+      'touchend',
+      (e) => {
+        const dx = e.changedTouches[0].clientX - startX;
+        if (Math.abs(dx) > 50) show(current + (dx < 0 ? 1 : -1));
+      },
+      { passive: true },
+    );
+  }
+</script>

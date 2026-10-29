@@ -1,0 +1,54 @@
+---
+import { site } from '../config/site';
+
+// Google Analytics 4.
+//
+// The tag is only emitted on a production build. `astro dev` sets
+// import.meta.env.PROD to false, so nothing you do while developing is ever
+// counted in the property. `npm run build` sets it to true, which is what
+// GitHub Actions runs, so the deployed site is tagged.
+const gaId = import.meta.env.PROD ? site.ga4MeasurementId : undefined;
+---
+
+{
+  gaId && (
+    <Fragment>
+      <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} />
+      <script is:inline define:vars={{ gaId }}>
+        // Astro wraps a define:vars script in an IIFE, so gtag is hung off
+        // window deliberately: a bare function declaration here would be
+        // function-scoped and invisible to gtag.js, Tag Assistant and any
+        // snippet pasted in later.
+        window.dataLayer = window.dataLayer || [];
+        window.gtag = function gtag() {
+          window.dataLayer.push(arguments);
+        };
+        gtag('js', new Date());
+        gtag('config', gaId);
+
+        // Enhanced measurement already reports page views, scroll depth and
+        // outbound clicks. What it cannot see is a `tel:` tap, which is this
+        // site's single most valuable action, so the inquiry paths are
+        // reported explicitly and tagged with where on the page they were hit.
+        document.addEventListener('click', (event) => {
+          const link = event.target.closest && event.target.closest('a[href]');
+          if (!link) return;
+
+          const href = link.getAttribute('href') || '';
+          let method;
+          if (href.startsWith('tel:')) method = 'phone';
+          else if (href.includes('wa.me')) method = 'whatsapp';
+          else if (href.includes('google.com/maps')) method = 'directions';
+          else if (href.includes('facebook.com')) method = 'facebook';
+          if (!method) return;
+
+          const area = link.closest('[data-ga-area]');
+          gtag('event', 'contact_click', {
+            method: method,
+            area: area ? area.getAttribute('data-ga-area') : 'page',
+          });
+        });
+      </script>
+    </Fragment>
+  )
+}

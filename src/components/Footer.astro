@@ -1,0 +1,26 @@
+---
+import { Image } from 'astro:assets';
+import { site } from '../config/site';
+// The logo as supplied: a white mark, at home on this deep blue ground.
+import logoFull from '../assets/images/LOGO.png';
+const year = new Date().getFullYear();
+---
+
+<!-- Bottom padding on mobile keeps the footer clear of the sticky CTA bar -->
+<footer id="site-footer" data-ga-area="footer" class="bg-accent pb-28 text-paper md:pb-0">
+  <div class="mx-auto flex max-w-6xl flex-col gap-6 px-5 py-12 text-base sm:px-8 md:flex-row md:items-center md:justify-between">
+    <div class="flex items-center gap-5">
+      <Image src={logoFull} alt="" width={150} height={110} loading="lazy" class="h-20 w-auto" />
+      <div>
+        <p class="font-serif text-xl font-semibold text-paper">{site.name}</p>
+        <p class="text-paper/80">{site.address.full}</p>
+      </div>
+    </div>
+    <div class="md:text-right">
+      <p>
+        <a href={site.phoneHref} class="font-bold text-paper underline">{site.phoneLocal}</a> · {site.hours}
+      </p>
+      <p class="text-paper/70">© {year} {site.name}. All rights reserved.</p>
+    </div>
+  </div>
+</footer>

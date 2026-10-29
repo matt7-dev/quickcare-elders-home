@@ -1,0 +1,64 @@
+---
+import { Image } from 'astro:assets';
+import { testimonials } from '../config/site';
+import { photo } from '../lib/images';
+
+// Any entry still marked as a placeholder renders only in `npm run dev`.
+const visible = testimonials.filter((t) => !t.placeholder || import.meta.env.DEV);
+---
+
+{
+  visible.length > 0 && (
+    <section id="testimonials" class="bg-stone/30">
+      <div class="section">
+        <h2 class="text-3xl">In their own words</h2>
+        <p class="mt-5 max-w-xl text-xl text-ink">
+          From the people who live here, their families, and the team who looks after them.
+        </p>
+
+        {/* Alternating sides rather than a row of matching cards, so three
+            different voices read as three people and not as a grid. */}
+        <ul class="mt-12 space-y-14 lg:space-y-20">
+          {visible.map((t, i) => {
+            const portrait = t.photo ? photo(t.photo) : undefined;
+            return (
+              <li class="reveal">
+                <figure
+                  class:list={[
+                    'flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-10',
+                    i % 2 === 1 && 'sm:flex-row-reverse',
+                  ]}
+                >
+                  {portrait && (
+                    <Image
+                      src={portrait}
+                      alt={`${t.name}, ${t.relation.split(' · ')[0].toLowerCase()} at Quick Care Elders Home`}
+                      widths={[220, 440]}
+                      sizes="(min-width: 640px) 11rem, 9rem"
+                      format="webp"
+                      loading="lazy"
+                      class="aspect-[4/5] w-36 shrink-0 rounded-media bg-stone object-cover sm:w-44"
+                    />
+                  )}
+
+                  <div class="sm:pt-1">
+                    <blockquote class="max-w-[52ch] text-xl leading-snug text-ink">“{t.quote}”</blockquote>
+                    <figcaption class="mt-5">
+                      <span class="block text-lg font-bold text-ink">{t.name}</span>
+                      <span class="block text-base text-ink-soft">{t.relation}</span>
+                      {t.placeholder && (
+                        <span class="mt-3 inline-block rounded-full bg-accent/10 px-3 py-1 text-xs font-bold text-accent-dark">
+                          PLACEHOLDER (dev only)
+                        </span>
+                      )}
+                    </figcaption>
+                  </div>
+                </figure>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </section>
+  )
+}

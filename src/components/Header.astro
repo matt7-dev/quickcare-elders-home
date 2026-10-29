@@ -1,0 +1,76 @@
+---
+import { Image } from 'astro:assets';
+import Icon from './Icon.astro';
+import { nav, site } from '../config/site';
+// The supplied logo is a white silhouette; this is the same mark tinted to
+// the company blue so it reads on the light bar. See logo-mark-white.png for
+// the original, used on the deep blue footer.
+import logoMark from '../assets/images/logo-mark-ink.png';
+---
+
+<!-- Not sticky on a phone: the bottom CTA bar already keeps Call and WhatsApp
+     in reach, and a fixed bar there only eats height and parks headings
+     behind itself. -->
+<header data-ga-area="header" class="relative z-40 bg-paper md:sticky md:top-0">
+  <div class="mx-auto flex h-20 max-w-6xl items-center justify-between gap-3 px-5 sm:gap-6 sm:px-8">
+    <!-- The mark is wide (1.86:1), so the lockup steps down on a phone to
+         leave room for the menu button. -->
+    <a href="#top" class="flex shrink-0 items-center gap-2.5 sm:gap-3">
+      <Image src={logoMark} alt="" width={96} height={52} loading="eager" class="h-8 w-auto sm:h-9" />
+      <span class="whitespace-nowrap font-serif text-[1.05rem] font-semibold text-ink sm:text-lg">
+        Quick Care Elders Home
+      </span>
+    </a>
+
+    <nav aria-label="Main" class="hidden items-center gap-6 text-sm font-semibold xl:flex">
+      {nav.map((item) => <a href={item.href} class="whitespace-nowrap text-ink hover:text-accent">{item.label}</a>)}
+    </nav>
+
+    <!-- On a phone the sticky bottom bar carries these. Tablets keep the phone
+         button only, so the bar never has to compete for width. -->
+    <div class="flex shrink-0 items-center gap-2">
+      <a
+        href={site.whatsappHref}
+        class="btn btn-outline hidden whitespace-nowrap px-4 text-sm lg:inline-flex"
+        target="_blank"
+        rel="noopener"
+      >
+        <Icon name="whatsapp" class="h-5 w-5" /> WhatsApp
+      </a>
+      <a href={site.phoneHref} class="btn btn-primary hidden whitespace-nowrap px-4 text-sm md:inline-flex">
+        <Icon name="phone" class="h-5 w-5" /> {site.phoneLocal}
+      </a>
+    </div>
+
+    <!-- Menu for everything below the full nav: native <details>, no JS needed -->
+    <details class="group relative shrink-0 xl:hidden">
+      <summary
+        class="flex h-12 w-12 cursor-pointer list-none items-center justify-center rounded-full text-ink hover:bg-stone/50 [&::-webkit-details-marker]:hidden"
+        aria-label="Menu"
+      >
+        <Icon name="menu" class="h-7 w-7 group-open:hidden" />
+        <Icon name="close" class="hidden h-7 w-7 group-open:block" />
+      </summary>
+      <nav aria-label="Mobile" class="overlay-menu absolute right-0 top-14 flex w-64 flex-col bg-paper p-2">
+        {
+          nav.map((item) => (
+            <a href={item.href} class="px-4 py-3 text-lg font-semibold text-ink hover:bg-stone/40">
+              {item.label}
+            </a>
+          ))
+        }
+      </nav>
+    </details>
+  </div>
+
+  <!-- Softens the bar's bottom edge while content scrolls under it. Only
+       where the bar is sticky; on a phone it scrolls away with the page. -->
+  <div aria-hidden="true" class="header-scrim pointer-events-none absolute inset-x-0 top-full hidden h-7 md:block"></div>
+</header>
+
+<script>
+  // Close the mobile menu after choosing a link
+  document.querySelectorAll<HTMLDetailsElement>('header details').forEach((d) => {
+    d.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => (d.open = false)));
+  });
+</script>
