@@ -13,6 +13,7 @@
     "domainName": "quickcare.lk",
     "githubRepo": "Mathews-axisTech/quickcare-elders-home",
     "githubBranch": "main",
-    "@aws-cdk/core:defaultCrossStackReferences": "strong"
+    "@aws-cdk/core:defaultCrossStackReferences": "strong",
+    "existingOidcProviderArn": "arn:aws:iam::794934876002:oidc-provider/token.actions.githubusercontent.com"
   }
 }
