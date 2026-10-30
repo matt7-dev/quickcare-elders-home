@@ -138,7 +138,7 @@ gh repo create quickcare-elders-home --public --source=. --remote=origin --push
 ```
 
 If you choose a different name, change `githubRepo` in `infra/cdk.json` to match before deploying.
-The name is currently set to `Mathews-axisTech/quickcare-elders-home`.
+The name is currently set to `matt7-dev/quickcare-elders-home`.
 
 ### Step 2 — Deploy DNS and delegate the domain
 
@@ -204,7 +204,7 @@ GitHub → **Settings** → **Secrets and variables** → **Actions** → **Vari
 
 **Variables, not Secrets.** None of these is sensitive. The role ARN is the interesting one: knowing
 it buys an attacker nothing, because the role can only be assumed by presenting a token GitHub
-signed whose subject is exactly `repo:Mathews-axisTech/quickcare-elders-home:ref:refs/heads/main`.
+signed whose subject is exactly `repo:matt7-dev/quickcare-elders-home:ref:refs/heads/main`.
 Only GitHub can mint that token, and only for this repository on this branch. Using Secrets here
 would just make the values harder to read in logs for no security gain.
 
@@ -238,7 +238,7 @@ leaks in a log it is valid immediately from anywhere.
 OIDC replaces it with a conversation:
 
 1. The workflow asks GitHub for a token describing itself. That is what `id-token: write` permits.
-2. The token says, signed by GitHub: *this is repo `Mathews-axisTech/quickcare-elders-home`, branch
+2. The token says, signed by GitHub: *this is repo `matt7-dev/quickcare-elders-home`, branch
    `main`.*
 3. The workflow hands it to AWS, which verifies GitHub's signature against the OpenID Connect
    provider registered in the account.
@@ -246,7 +246,7 @@ OIDC replaces it with a conversation:
    credentials that expire in an hour.
 
 Nothing durable is stored anywhere. The trust policy uses `StringEquals` on the full subject, not
-`StringLike` with a wildcard — `repo:Mathews-axisTech/*:*` would let *any* repository of yours
+`StringLike` with a wildcard — `repo:matt7-dev/*:*` would let *any* repository of yours
 deploy, and without the `ref:refs/heads/main` part, a pull request from a fork could too.
 
 ### Why ALIAS records, not CNAME
