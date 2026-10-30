@@ -32,9 +32,6 @@ cdk.context.json
 *.pem
 .aws/
 
-# spare images
-.spares
-
 # Unused spare photography, kept locally only
 spares/
 
