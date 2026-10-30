@@ -11,7 +11,7 @@
   },
   "context": {
     "domainName": "quickcare.lk",
-    "githubRepo": "matt7-dev/quickcare-elders-home",
+    "githubSubjectPrefix": "repo:matt7-dev@179466363/quickcare-elders-home@1439553718",
     "githubBranch": "main",
     "@aws-cdk/core:defaultCrossStackReferences": "strong",
     "existingOidcProviderArn": "arn:aws:iam::794934876002:oidc-provider/token.actions.githubusercontent.com"

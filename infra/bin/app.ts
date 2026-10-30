@@ -9,14 +9,17 @@ const app = new cdk.App();
 
 // Values come from the "context" block in cdk.json.
 const domainName = app.node.tryGetContext('domainName') as string;
-const githubRepo = app.node.tryGetContext('githubRepo') as string; // "owner/repo"
+// "repo:owner@ownerId/repo@repoId" — GitHub's immutable OIDC subject prefix,
+// read with: gh api repos/OWNER/REPO/actions/oidc/customization/sub
+const githubSubjectPrefix = app.node.tryGetContext('githubSubjectPrefix') as string;
 const githubBranch = (app.node.tryGetContext('githubBranch') as string) || 'main';
 // Only one GitHub OIDC provider can exist per AWS account. If this account
 // already has one, put its ARN here and CDK will reuse it instead of failing.
 const existingOidcProviderArn = app.node.tryGetContext('existingOidcProviderArn') as string | undefined;
 
 if (!domainName) throw new Error('Set "domainName" in infra/cdk.json');
-if (!githubRepo || githubRepo.includes('OWNER')) throw new Error('Set "githubRepo" in infra/cdk.json');
+if (!githubSubjectPrefix?.startsWith('repo:'))
+  throw new Error('Set "githubSubjectPrefix" in infra/cdk.json');
 
 // CloudFront can only use certificates issued in us-east-1, so the stacks that
 // own the certificate and the distribution live there. Everything else here is
@@ -32,7 +35,7 @@ const dns = new DnsStack(app, 'QuickCareDns', { domainName, env });
 new SiteStack(app, 'QuickCareSite', {
   domainName,
   hostedZone: dns.hostedZone, // passing an object from the previous stack, CDK will link them automatically and save us from having to do it manually in the AWS Console
-  githubRepo,
+  githubSubjectPrefix,
   githubBranch,
   existingOidcProviderArn,
   env,

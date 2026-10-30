@@ -13,8 +13,14 @@ export interface SiteStackProps extends cdk.StackProps {
   domainName: string;
   /** The zone created by DnsStack, already delegated at the registrar. */
   hostedZone: route53.IHostedZone;
-  /** "owner/repo" allowed to deploy via GitHub Actions OIDC. */
-  githubRepo: string;
+  /**
+   * The immutable subject prefix GitHub puts in the OIDC token, of the form
+   * `repo:owner@ownerId/repo@repoId`. GitHub issues immutable subjects by
+   * default, so the plain `repo:owner/repo` form does not match. Read the
+   * current value with:
+   *   gh api repos/OWNER/REPO/actions/oidc/customization/sub
+   */
+  githubSubjectPrefix: string;
   /** Branch allowed to deploy. */
   githubBranch: string;
   /** Only one GitHub OIDC provider may exist per AWS account; pass an existing one's ARN to reuse it. */
@@ -118,10 +124,12 @@ export class SiteStack extends cdk.Stack {
         // StringEquals, not StringLike: an exact match on the full subject.
         // A wildcard such as repo:owner/*:* would let any repository in the
         // account assume this role, and `ref:refs/heads/main` additionally
-        // rules out pull requests, tags and every other branch.
+        // rules out pull requests, tags and every other branch. The numeric
+        // ids in the prefix pin the trust to this account and this repository
+        // even if either is renamed, or the old name is claimed by someone else.
         StringEquals: {
           'token.actions.githubusercontent.com:aud': 'sts.amazonaws.com',
-          'token.actions.githubusercontent.com:sub': `repo:${props.githubRepo}:ref:refs/heads/${props.githubBranch}`,
+          'token.actions.githubusercontent.com:sub': `${props.githubSubjectPrefix}:ref:refs/heads/${props.githubBranch}`,
         },
       }),
     });

@@ -30,9 +30,12 @@ Decided and in place; do not substitute alternatives:
   public; the certificate lives in `us-east-1` because CloudFront reads certificates only from
   there, so the whole stack is pinned to that region.
 - **GitHub OIDC federation**, never stored AWS access keys. The deploy role's trust policy uses
-  `StringEquals` on the exact `sub` (`repo:OWNER/REPO:ref:refs/heads/main`) — never `StringLike`
-  with wildcards — and grants only S3 read/write/delete on the site bucket plus
-  `cloudfront:CreateInvalidation` and `GetInvalidation` on the one distribution.
+  `StringEquals` on the exact `sub` — never `StringLike` with wildcards — and grants only S3
+  read/write/delete on the site bucket plus `cloudfront:CreateInvalidation` and `GetInvalidation`
+  on the one distribution. GitHub issues **immutable subjects**, so that `sub` is
+  `repo:owner@ownerId/repo@repoId:ref:refs/heads/main`, not the plain `repo:owner/repo` form; the
+  prefix lives in `githubSubjectPrefix` in `infra/cdk.json` and is read with
+  `gh api repos/OWNER/REPO/actions/oidc/customization/sub`.
 - Route 53 gets **ALIAS** records (A and AAAA, apex and www), never CNAME.
 - Two stacks: `QuickCareDns` must be deployed and its nameservers delegated at the `.lk` registrar
   before `QuickCareSite`, or certificate validation cannot complete.

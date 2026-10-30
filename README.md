@@ -137,8 +137,13 @@ The IAM trust policy is pinned to the exact repository name, so this comes first
 gh repo create quickcare-elders-home --public --source=. --remote=origin --push
 ```
 
-If you choose a different name, change `githubRepo` in `infra/cdk.json` to match before deploying.
-The name is currently set to `matt7-dev/quickcare-elders-home`.
+The trust policy is pinned to this repository's immutable OIDC subject, so if you create the
+repository under a different name or account, read the new prefix and put it in `cdk.json` as
+`githubSubjectPrefix` before deploying:
+
+```bash
+gh api repos/OWNER/REPO/actions/oidc/customization/sub --jq .sub_claim_prefix
+```
 
 ### Step 2 — Deploy DNS and delegate the domain
 
@@ -238,8 +243,8 @@ leaks in a log it is valid immediately from anywhere.
 OIDC replaces it with a conversation:
 
 1. The workflow asks GitHub for a token describing itself. That is what `id-token: write` permits.
-2. The token says, signed by GitHub: *this is repo `matt7-dev/quickcare-elders-home`, branch
-   `main`.*
+2. The token says, signed by GitHub: *this is repo `matt7-dev/quickcare-elders-home` (account id
+   `179466363`, repo id `1439553718`), branch `main`.*
 3. The workflow hands it to AWS, which verifies GitHub's signature against the OpenID Connect
    provider registered in the account.
 4. AWS checks the token's claims against the role's trust policy, and if they match, issues
@@ -248,6 +253,21 @@ OIDC replaces it with a conversation:
 Nothing durable is stored anywhere. The trust policy uses `StringEquals` on the full subject, not
 `StringLike` with a wildcard — `repo:matt7-dev/*:*` would let *any* repository of yours
 deploy, and without the `ref:refs/heads/main` part, a pull request from a fork could too.
+
+The subject itself is GitHub's **immutable** form, which embeds numeric ids:
+
+```
+repo:matt7-dev@179466363/quickcare-elders-home@1439553718:ref:refs/heads/main
+```
+
+Names can be changed, and a released name can be claimed by someone else; the account id and
+repository id cannot. Pinning to them means a rename never silently breaks the deploy, and more
+importantly that nobody inheriting an old name ever inherits this role. The prefix is stored as
+`githubSubjectPrefix` in `infra/cdk.json`; read the current value with:
+
+```bash
+gh api repos/OWNER/REPO/actions/oidc/customization/sub
+```
 
 ### Why ALIAS records, not CNAME
 
