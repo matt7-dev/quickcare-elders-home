@@ -1,3 +1,6 @@
+// this file is the entry point for the CDK application
+// it is used to define and deploy the infrastructure and to tell which stacks exist
+
 import * as cdk from 'aws-cdk-lib';
 import { DnsStack } from '../lib/dns-stack.js';
 import { SiteStack } from '../lib/site-stack.js';
@@ -28,7 +31,7 @@ const dns = new DnsStack(app, 'QuickCareDns', { domainName, env });
 // has taken effect.
 new SiteStack(app, 'QuickCareSite', {
   domainName,
-  hostedZone: dns.hostedZone,
+  hostedZone: dns.hostedZone, // passing an object from the previous stack, CDK will link them automatically and save us from having to do it manually in the AWS Console
   githubRepo,
   githubBranch,
   existingOidcProviderArn,
