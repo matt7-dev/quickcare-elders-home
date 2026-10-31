@@ -32,6 +32,16 @@ Estimated running cost for a site this size: **about $0.50–1.00/month** — th
 is $0.50, and S3 storage plus CloudFront traffic fall inside the perpetual free tier (1 TB out and
 10 million requests a month). The `.lk` domain is billed separately by the registrar.
 
+A `QuickCare-Monthly` AWS Budget guards that estimate: $5/month, alerting on 80% actual and 100%
+forecasted spend. It is account-level rather than site-level, so it deliberately sits outside both
+CDK stacks — a `cdk destroy` should not take the billing guardrail with it. Recreate it with:
+
+```bash
+aws budgets create-budget --account-id <ACCOUNT_ID> \
+  --budget '{"BudgetName":"QuickCare-Monthly","BudgetLimit":{"Amount":"5","Unit":"USD"},"TimeUnit":"MONTHLY","BudgetType":"COST"}' \
+  --notifications-with-subscribers '[{"Notification":{"NotificationType":"ACTUAL","ComparisonOperator":"GREATER_THAN","Threshold":80,"ThresholdType":"PERCENTAGE"},"Subscribers":[{"SubscriptionType":"EMAIL","Address":"<EMAIL>"}]}]'
+```
+
 ## Local development
 
 ```bash
