@@ -33,6 +33,19 @@ export class DnsStack extends cdk.Stack {
     // zone gets different nameservers, so this one is kept on `cdk destroy`.
     this.hostedZone.applyRemovalPolicy(cdk.RemovalPolicy.RETAIN);
 
+    // Proves ownership of the domain to Google Search Console. It verifies a
+    // "Domain" property, which covers apex, www and every protocol at once —
+    // unlike a URL-prefix property, which would only cover the exact URL. It
+    // lives here rather than being clicked into the console so that the zone
+    // stays fully described by code: rebuild the zone and verification
+    // survives. Deleting this record un-verifies the property.
+    new route53.TxtRecord(this, 'SearchConsoleVerification', {
+      zone: this.hostedZone,
+      recordName: props.domainName,
+      values: ['google-site-verification=dcOvDPqwk42CWOVEn9JSSTMyHZwh1e746DqHloLChZ0'],
+      ttl: cdk.Duration.hours(1),
+    });
+
     new cdk.CfnOutput(this, 'HostedZoneId', { value: this.hostedZone.hostedZoneId });
     new cdk.CfnOutput(this, 'Nameservers', {
       description: 'Set these as the nameservers for the domain at your .lk registrar',
